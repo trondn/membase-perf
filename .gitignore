@@ -1,0 +1,5 @@
+# Keep the entries sorted to reduce the risk for a merge conflict
+*~
+/.deps/
+/results/
+/target/
