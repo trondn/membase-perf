@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+      Copyright 2011 Membase, Inc.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<Test maxduration="20" xmlns="http://kenai.com/projects/jet" version="1.0">
+    <TestDescription author="trond.norbye@gmail.com" testobject="MembaseServerStartup">
+        <Objective>Performance tests for membase</Objective>
+        <EnvironmentalReq></EnvironmentalReq>
+        <FailCriteria></FailCriteria>
+    </TestDescription>
+
+    <TestSetup class="org.membase.jet.setup.MemcachedServerSetup"
+               comment="Start Memcached with ep-engine and define all bucket">
+        <TestSuite>
+            <TestCase class="org.membase.jet.tests.DatasetTest"
+                      method="bulkLoad"
+                      comment="Creating the dataset"/>
+            <TestCase class="org.membase.jet.tests.DatasetTest"
+                      method="verify"
+                      comment="Verify that all of the keys are there"/>
+
+            <TestSetup class="com.sun.jet.framework.load.LoadSetup"
+                       comment="Run a varity of load on the system for a while">
+                <LoadClient id="loadsetup"
+                            scheduler="com.sun.jet.framework.load.scheduler.ParallelScheduler"
+                            executeTime="250000"
+                            thinktimeClass="com.sun.jet.framework.load.thinktime.NegExponentialThinkTime">
+                    <Transaction id="get"
+                                 className="org.membase.jet.load.GetTransaction"
+                                 instanceCount="20"/>
+                    <Transaction id="set"
+                                 className="org.membase.jet.load.SetTransaction"
+                                 instanceCount="10"/>
+                    <Transaction id="random"
+                                 className="org.membase.jet.load.RandomTransaction"
+                                 instanceCount="5"/>
+                </LoadClient>
+                <TestSuite>
+                    <TestCase class="com.sun.jet.framework.testcase.SleepWaitTestCase"
+                              method="sleepBySeconds"
+                              comment="Run load for 5 minutes">
+                        <Binding key="jet.sleeptime" value="300"/>
+                    </TestCase>
+                </TestSuite>
+            </TestSetup>
+            <!--
+            <TestSetup class="com.sun.jet.framework.load.LoadSetup"
+                       comment="Simulate a PHP application">
+                <LoadClient id="loadsetup"
+                            scheduler="com.sun.jet.framework.load.scheduler.ParallelScheduler"
+                            executeTime="250000"
+                            thinktimeClass="com.sun.jet.framework.load.thinktime.NegExponentialThinkTime">
+                    <Transaction id="Php" className="org.membase.jet.load.PhpTransaction" instanceCount="1"/>
+                </LoadClient>
+                <TestSuite>
+                    <TestCase class="com.sun.jet.framework.testcase.SleepWaitTestCase"
+                              method="sleepBySeconds"
+                              comment="Run load for 5 minutes">
+                        <Binding key="jet.sleeptime" value="300"/>
+                    </TestCase>
+                </TestSuite>
+            </TestSetup>
+            -->
+        </TestSuite>
+    </TestSetup>
+</Test>
